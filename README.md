@@ -63,18 +63,4 @@ node server/index.js
 npm run dev
 ```
 
-Open `http://localhost:5173` and enjoy!
-
-## 🛡️ Admin Access
-
-To update prices, click **"Admin Login"** in the footer.
-
-- **Password**: `pupusa123` (Default for development)
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
 Made with ❤️ and 🌽 in El Salvador.
