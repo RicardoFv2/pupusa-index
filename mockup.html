@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Pupusa Index Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+        }
+        .input-glass {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-glass:focus {
+             border-color: #00d1ff;
+             box-shadow: none;
+             outline: none;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-dark text-white antialiased">
+<div class="gradient-bg"></div>
+<div class="relative flex min-h-screen w-full flex-col items-center overflow-x-hidden">
+<header class="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-5">
+<div class="flex items-center justify-between whitespace-nowrap">
+<div class="flex items-center gap-3 text-white">
+<div class="size-6 text-white">
+<svg fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path><path d="M12 17.27l-4.15 2.51c-.76.46-1.68-.21-1.49-1.08l1.07-4.89-3.72-3.21c-.67-.58-.31-1.68.57-1.75l4.95-.42 2.02-4.58c.35-.79 1.5-.79 1.85 0l2.02 4.58 4.95.42c.88.07 1.24 1.17.57 1.75l-3.72 3.21 1.07 4.89c.19.87-.73 1.54-1.49 1.08L12 17.27z"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight">Pupusa Index</h2>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-white/80 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">Dashboard</a>
+<a class="text-white/80 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">About</a>
+<a class="text-white/80 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">Data Source</a>
+</div>
+</div>
+</header>
+<main class="flex h-full grow flex-col items-center justify-center w-full px-4 sm:px-6 lg:px-8 py-16">
+<div class="flex flex-col max-w-4xl w-full gap-12">
+<!-- Hero Section -->
+<div class="flex flex-col items-center text-center">
+<h1 class="text-white tracking-tight text-5xl md:text-6xl font-black">The Pupusa Index</h1>
+<p class="text-white/70 text-lg font-normal leading-normal max-w-2xl mt-4">Tracking the affordability and economic trends of El Salvador's favorite dish.</p>
+</div>
+<!-- Main Data Display & Metric Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Main Data Point -->
+<div class="md:col-span-2 glass-card rounded-xl p-6 flex flex-col justify-center">
+<p class="text-white/80 text-base font-medium leading-normal mb-2">Current Average Price (Revueltas)</p>
+<p class="text-white text-6xl font-bold leading-tight tracking-tighter">$0.85 <span class="text-4xl font-semibold text-white/60">USD</span></p>
+<p class="text-green-400 text-base font-medium leading-normal mt-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">trending_up</span>
+<span>+1.2% this month</span>
+</p>
+</div>
+<!-- Secondary Metric Card -->
+<div class="glass-card rounded-xl p-6 flex flex-col justify-center">
+<p class="text-white/80 text-base font-medium leading-normal mb-2">Purchasing Power</p>
+<p class="text-white text-5xl font-bold leading-tight tracking-tighter">14.1</p>
+<p class="text-white/60 text-sm font-normal mt-2">Pupusas per Daily Minimum Wage<br/>(based on $12.00/day)</p>
+</div>
+</div>
+<!-- Interactive Calculator Card -->
+<div class="glass-card rounded-xl p-8">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="w-full md:w-1/2">
+<h3 class="text-white text-2xl font-bold tracking-tight">Pupusa Budget Calculator</h3>
+<p class="text-white/70 text-base font-normal leading-normal mt-1">Enter your budget in USD to see how many pupusas you can afford.</p>
+</div>
+<div class="w-full md:w-1/2 flex flex-col sm:flex-row items-center gap-4">
+<div class="relative w-full">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-lg font-semibold">$</span>
+<input class="input-glass w-full rounded-lg h-14 pl-8 pr-4 text-white text-xl font-semibold leading-normal placeholder:text-white/40 focus:ring-0" placeholder="20.00" type="number"/>
+</div>
+<button class="flex min-w-[140px] w-full sm:w-auto max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-6 bg-[#00d1ff] hover:bg-cyan-500 transition-colors text-black text-base font-bold leading-normal tracking-wide">
+<span class="truncate">Calculate</span>
+</button>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-solid border-white/10 text-center md:text-left">
+<p class="text-white text-xl">With <span class="font-bold text-[#00d1ff]">$20.00</span>, you can buy approximately <span class="font-bold text-[#00d1ff]">23</span> pupusas.</p>
+</div>
+</div>
+</div>
+</main>
+<footer class="w-full text-center py-8 px-4">
+<p class="text-white/50 text-xs">Data updated on October 26, 2023 | <a class="hover:text-white/80 underline" href="#">About the Index</a></p>
+</footer>
+</div>
+</body></html>

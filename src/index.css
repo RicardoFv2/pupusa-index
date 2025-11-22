@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-display bg-background-dark text-white antialiased;
+}
+
+.gradient-bg {
+  @apply fixed inset-0 -z-10 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e];
+}
+
+.glass-card {
+  @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg rounded-xl transition-all duration-300;
+}
+  
+.glass-card:hover {
+  @apply shadow-2xl border-white/30;
+}
+
+.input-glass {
+  @apply bg-black/20 border border-white/20 placeholder:text-white/40;
+}
+
+.input-glass:focus {
+  @apply ring-0 border-primary outline-none;
+}
