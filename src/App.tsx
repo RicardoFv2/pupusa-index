@@ -12,6 +12,7 @@ import GlobalParity from "./components/GlobalParity";
 import CustomNotification from "./components/Notification";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import LanguageToggle from "./components/LanguageToggle";
+import SubmitPriceModal from "./components/SubmitPriceModal";
 
 // ... (inside App function)
 
@@ -23,6 +24,7 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showSubmitPrice, setShowSubmitPrice] = useState(false);
   const [adminPassword, setAdminPassword] = useState<string | null>(null);
   const [notification, setNotification] = useState<{
     message: string;
@@ -130,7 +132,15 @@ function AppContent() {
                 {t("appTitle")}
               </h2>
             </div>
-            <LanguageToggle />
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowSubmitPrice(true)}
+                className="text-sm font-medium text-[#00d1ff] hover:text-white transition-colors"
+              >
+                {t("submitButton")}
+              </button>
+              <LanguageToggle />
+            </div>
           </div>
         </header>
 
@@ -175,6 +185,15 @@ function AppContent() {
           <LoginModal
             onLogin={handleAdminLogin}
             onCancel={() => setShowLogin(false)}
+          />
+        )}
+
+        {showSubmitPrice && (
+          <SubmitPriceModal
+            onClose={() => setShowSubmitPrice(false)}
+            onSubmitSuccess={() => {
+              showNotification(t("submitSuccess"), "success");
+            }}
           />
         )}
 

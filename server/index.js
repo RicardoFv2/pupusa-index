@@ -79,6 +79,51 @@ app.post("/api/pupusa-prices", async (req, res) => {
   }
 });
 
+const SUBMISSIONS_FILE = path.join(__dirname, "submissions.json");
+
+// Helper to save submission
+async function saveSubmission(submission) {
+  let submissions = [];
+  try {
+    const data = await fs.readFile(SUBMISSIONS_FILE, "utf8");
+    submissions = JSON.parse(data);
+  } catch (error) {
+    // If file doesn't exist or is empty, start with empty array
+  }
+  submissions.push(submission);
+  await fs.writeFile(
+    SUBMISSIONS_FILE,
+    JSON.stringify(submissions, null, 2),
+    "utf8"
+  );
+}
+
+// Endpoint to submit a price
+app.post("/api/prices/submit", async (req, res) => {
+  try {
+    const { location, price, establishment } = req.body;
+
+    if (!location || !price) {
+      return res
+        .status(400)
+        .json({ message: "Location and price are required" });
+    }
+
+    const submission = {
+      location,
+      price: parseFloat(price),
+      establishment: establishment || "Anonymous",
+      date: new Date().toISOString(),
+    };
+
+    await saveSubmission(submission);
+    res.json({ message: "Price submitted successfully", submission });
+  } catch (error) {
+    console.error("Error submitting price:", error);
+    res.status(500).json({ message: "Failed to submit price" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
