@@ -33,6 +33,10 @@ export const translations = {
     loginButton: "Login",
     cancelButton: "Cancel",
     dataSource: "Data from backend API",
+    inspirationLabel: "Inspiration:",
+    bigMacLinkText: "The Big Mac Index",
+    projectRepoLabel: "Project Repository:",
+    projectRepoLinkText: "View on GitHub",
   },
   es: {
     appTitle: "Índice Pupusa",
@@ -67,5 +71,9 @@ export const translations = {
     loginButton: "Entrar",
     cancelButton: "Cancelar",
     dataSource: "Datos del API backend",
+    inspirationLabel: "Inspiración:",
+    bigMacLinkText: "El Índice Big Mac",
+    projectRepoLabel: "Repositorio del Proyecto:",
+    projectRepoLinkText: "Ver en GitHub",
   },
 };
