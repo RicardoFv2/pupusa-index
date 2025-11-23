@@ -15,22 +15,6 @@ By tracking the price of a standard _Revuelta_ pupusa, we can analyze:
 - **Labor Value**: How many minutes of minimum wage work it takes to earn a meal.
 - **Global Parity**: How much cheaper it is to live in El Salvador vs. the USA.
 
-## 📐 Methodology
-
-The **Pupusa Index** is calculated using a simplified version of the purchasing power parity (PPP) theory.
-
-### The Formula
-
-$$
-\text{Pupusa Index} = \frac{\text{Price of Revuelta (SV)}}{\text{Daily Minimum Wage (SV)}}
-$$
-
-### Data Sources
-
-- **Pupusa Prices**: Crowdsourced and averaged from local pupuserías (currently mocked for demonstration).
-- **Minimum Wage**: Based on the current daily minimum wage in El Salvador (approx. $12.00 USD).
-- **Comparative Data**: Inspired by [The Economist's Big Mac Index](https://github.com/TheEconomist/big-mac-data), we compare local purchasing power against global standards.
-
 ## ✨ Features
 
 - **📊 Real-Time Metrics**: Live updates on average pupusa prices.
