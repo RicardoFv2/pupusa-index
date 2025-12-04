@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { supabase } from "../utils/supabase";
 
 type SubmitPriceModalProps = {
   onClose: () => void;
@@ -40,25 +41,20 @@ const SubmitPriceModal: React.FC<SubmitPriceModalProps> = ({
     setError(null);
 
     try {
-      const response = await fetch("/api/prices/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { error } = await supabase.from("submissions").insert([
+        {
           location,
           price: parseFloat(price),
-          establishment,
-        }),
-      });
+          establishment: establishment || "Anonymous",
+        },
+      ]);
 
-      if (!response.ok) {
-        throw new Error("Failed to submit");
-      }
+      if (error) throw error;
 
       onSubmitSuccess();
       onClose();
     } catch (err) {
+      console.error("Error submitting price:", err);
       setError(t("submitError"));
     } finally {
       setLoading(false);

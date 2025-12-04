@@ -13,6 +13,7 @@ import CustomNotification from "./components/Notification";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import LanguageToggle from "./components/LanguageToggle";
 import SubmitPriceModal from "./components/SubmitPriceModal";
+import { supabase } from "./utils/supabase";
 
 // ... (inside App function)
 
@@ -42,21 +43,26 @@ function AppContent() {
 
   const fetchPupusaPrices = async () => {
     try {
-      const response = await fetch("/api/pupusa-prices");
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const { data, error } = await supabase.from("pupusa_prices").select("*");
+
+      if (error) throw error;
+
+      const prices: Record<string, number> = {};
+      if (data) {
+        data.forEach((item: { type: string; price: number }) => {
+          prices[item.type] = Number(item.price);
+        });
       }
-      const data: Record<string, number> = await response.json();
-      setPupusaPrices(data);
+
+      setPupusaPrices(prices);
 
       // Set the main pupusa price (e.g., 'revueltas' or the first one available)
-      if (data && data["pupusa revuelta"]) {
-        // Adjusted to match the scraper's output if 'revueltas' becomes 'pupusa revuelta'
-        setMainPupusaPrice(data["pupusa revuelta"]);
-      } else if (data && data["revueltas"]) {
-        setMainPupusaPrice(data["revueltas"]);
-      } else if (Object.keys(data).length > 0) {
-        setMainPupusaPrice(Object.values(data)[0]); // Fallback to the first available price
+      if (prices["pupusa revuelta"]) {
+        setMainPupusaPrice(prices["pupusa revuelta"]);
+      } else if (prices["revueltas"]) {
+        setMainPupusaPrice(prices["revueltas"]);
+      } else if (Object.keys(prices).length > 0) {
+        setMainPupusaPrice(Object.values(prices)[0]); // Fallback to the first available price
       } else {
         throw new Error("No pupusa prices found in response");
       }

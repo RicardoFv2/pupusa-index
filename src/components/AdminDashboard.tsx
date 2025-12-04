@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import GlassCard from "./GlassCard";
 import { useLanguage } from "../context/LanguageContext";
+import { supabase } from "../utils/supabase";
 
 type AdminDashboardProps = {
   onUpdate: () => void;
@@ -21,18 +22,29 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   } | null>(null);
 
   useEffect(() => {
-    fetch("/api/pupusa-prices")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchPrices = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("pupusa_prices")
+          .select("*");
+
+        if (error) throw error;
+
         // Convert numbers to strings for editing
         const stringPrices: Record<string, string> = {};
-        Object.entries(data).forEach(([key, value]) => {
-          stringPrices[key] = String(value);
-        });
+        if (data) {
+          data.forEach((item: { type: string; price: number }) => {
+            stringPrices[item.type] = String(item.price);
+          });
+        }
         setPrices(stringPrices);
         setLoading(false);
-      })
-      .catch((err) => console.error("Failed to fetch prices:", err));
+      } catch (err) {
+        console.error("Failed to fetch prices:", err);
+      }
+    };
+
+    fetchPrices();
   }, []);
 
   const handlePriceChange = (name: string, value: string) => {
@@ -46,26 +58,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setSaving(true);
     setMessage(null);
     try {
-      // Convert strings back to numbers for saving
-      const numericPrices: Record<string, number> = {};
-      Object.entries(prices).forEach(([key, value]) => {
-        numericPrices[key] = parseFloat(value) || 0;
+      // Update each price in Supabase
+      const updates = Object.entries(prices).map(async ([type, priceStr]) => {
+        const price = parseFloat(priceStr) || 0;
+        const { error } = await supabase
+          .from("pupusa_prices")
+          .upsert({ type, price });
+        if (error) throw error;
       });
 
-      const response = await fetch("/api/pupusa-prices", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-password": password,
-        },
-        body: JSON.stringify(numericPrices),
-      });
-
-      if (!response.ok) throw new Error("Failed to update");
+      await Promise.all(updates);
 
       setMessage({ text: t("adminSuccess"), type: "success" });
       onUpdate(); // Refresh app data
     } catch (error) {
+      console.error("Error saving prices:", error);
       setMessage({ text: t("adminError"), type: "error" });
     } finally {
       setSaving(false);

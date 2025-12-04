@@ -5,6 +5,18 @@
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Glassmorphism Design)
 - **Charts**: [Recharts](https://recharts.org/)
 - **Icons**: Google Material Symbols
+- **Note**: This project uses **Supabase** for data storage.
+
+### 🗄️ Database Setup (Supabase)
+
+To enable dynamic price updates and submissions:
+
+1.  Create a project at [Supabase](https://supabase.com).
+2.  Get your `Project URL` and `anon public key` from Settings -> API.
+3.  Add them to your Vercel Environment Variables:
+    - `VITE_SUPABASE_URL`
+    - `VITE_SUPABASE_ANON_KEY`
+4.  Run the SQL script in `supabase/schema.sql` (or ask the AI to do it!) to create the tables.
 
 ## 🚀 Getting Started
 
