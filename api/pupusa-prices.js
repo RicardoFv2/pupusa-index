@@ -2,10 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 // In Vercel, we can't write to the source directory.
-// We'll use /tmp for temporary persistence in the same execution context,
-// but ideally this should be a database (Vercel KV, Postgres, etc.)
+// We'll use /tmp for temporary persistence in the same execution context.
 const TMP_FILE = "/tmp/prices.json";
-const SOURCE_FILE = path.join(process.cwd(), "server", "prices.json");
+
+// Require the file directly to ensure it's bundled by Vercel
+const defaultPrices = require("./prices.json");
 
 const ADMIN_PASSWORD = "pupusa123";
 
@@ -17,19 +18,14 @@ function getPupusaPrices() {
       const data = fs.readFileSync(TMP_FILE, "utf8");
       return JSON.parse(data);
     }
-    // Fallback to the source file included in the deployment
-    if (fs.existsSync(SOURCE_FILE)) {
-      const data = fs.readFileSync(SOURCE_FILE, "utf8");
-      return JSON.parse(data);
-    }
-    return {};
+    // Fallback to the bundled file
+    return defaultPrices;
   } catch (error) {
     console.error("Error reading price file:", error);
-    return {};
+    return defaultPrices;
   }
 }
 
-// Helper to save prices
 // Helper to save prices
 async function savePupusaPrices(prices) {
   try {
@@ -40,7 +36,7 @@ async function savePupusaPrices(prices) {
     if (process.env.GITHUB_TOKEN) {
       const owner = process.env.GITHUB_REPO_OWNER || "RicardoFv2";
       const repo = process.env.GITHUB_REPO_NAME || "pupusa-index";
-      const path = "server/prices.json";
+      const path = "api/prices.json"; // Update path to new location
       const message = "Update pupusa prices via Admin Dashboard";
       const content = Buffer.from(JSON.stringify(prices, null, 2)).toString(
         "base64"
@@ -93,7 +89,7 @@ async function savePupusaPrices(prices) {
 
 module.exports = async (req, res) => {
   // CORS headers
-  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
