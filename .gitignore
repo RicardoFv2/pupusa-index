@@ -33,4 +33,5 @@ yarn-error.log*
 
 # Local data
 prices.json
+!api/prices.json
 server/submissions.json
