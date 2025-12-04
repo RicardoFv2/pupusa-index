@@ -40,7 +40,7 @@ const SubmitPriceModal: React.FC<SubmitPriceModalProps> = ({
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3001/api/prices/submit", {
+      const response = await fetch("/api/prices/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -42,7 +42,7 @@ function AppContent() {
 
   const fetchPupusaPrices = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/pupusa-prices");
+      const response = await fetch("/api/pupusa-prices");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -144,7 +144,7 @@ function AppContent() {
           </div>
         </header>
 
-        <main className="flex h-full grow flex-col items-center justify-center w-full px-4 sm:px-6 lg:px-8 py-16">
+        <main className="flex h-full grow flex-col items-center w-full px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex flex-col max-w-4xl w-full gap-12">
             <Hero />
 

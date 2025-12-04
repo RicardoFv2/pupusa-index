@@ -5,7 +5,7 @@ export const translations = {
     appTitle: "Pupusa Index",
     heroTitle: "The Pupusa Index",
     heroSubtitle:
-      "Tracking the purchasing power of El Salvador through the price of a Revueltas Pupusa.",
+      "Tracking the purchasing power of El Salvador through the price of a Pupusa Revueltas.",
     keyMetricLabel: "Current Average Price",
     contextualDataLabel: "Pupusas per Daily Minimum Wage",
     calculatorTitle: "Pupusa Calculator",
