@@ -14,7 +14,7 @@ const Calculator: React.FC<CalculatorProps> = ({ price }) => {
     setBudget(event.target.value);
   };
 
-  const pupusas = budget ? (parseFloat(budget) / price).toFixed(2) : "0.00";
+  const pupusas = budget ? Math.floor(parseFloat(budget) / price) : 0;
 
   return (
     <GlassCard className="p-8">
