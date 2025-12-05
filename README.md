@@ -16,7 +16,7 @@ To enable dynamic price updates and submissions:
 3.  Add them to your Vercel Environment Variables:
     - `VITE_SUPABASE_URL`
     - `VITE_SUPABASE_ANON_KEY`
-    - `VITE_ADMIN_PASSWORD`: Your desired admin password (defaults to "pupusa123" if not set)
+    - `VITE_ADMIN_PASSWORD`: **Required** for admin access.
 4.  Run the SQL script in `supabase/schema.sql` (or ask the AI to do it!) to create the tables.
 
 ## 🚀 Getting Started

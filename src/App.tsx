@@ -91,8 +91,9 @@ function AppContent() {
   };
 
   const handleAdminLogin = (password: string) => {
-    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || "pupusa123"; // Fallback for dev if env not set
-    if (password === correctPassword) {
+    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+
+    if (correctPassword && password === correctPassword) {
       setAdminPassword(password);
       setShowLogin(false);
       setShowAdmin(true);
