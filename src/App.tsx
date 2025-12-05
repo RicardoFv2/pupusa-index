@@ -126,15 +126,12 @@ function AppContent() {
         <header className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between whitespace-nowrap">
             <div className="flex items-center gap-3 text-white">
-              <div className="size-6 text-white">
-                <svg
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
-                  <path d="M12 17.27l-4.15 2.51c-.76.46-1.68-.21-1.49-1.08l1.07-4.89-3.72-3.21c-.67-.58-.31-1.68.57-1.75l4.95-.42 2.02-4.58c.35-.79 1.5-.79 1.85 0l2.02 4.58 4.95.42c.88.07 1.24 1.17.57 1.75l-3.72 3.21 1.07 4.89c.19.87-.73 1.54-1.49 1.08L12 17.27z"></path>
-                </svg>
+              <div className="size-[60px] rounded-full overflow-hidden border border-white/20 shadow-sm">
+                <img
+                  src="/favicon.svg"
+                  alt="Pupusa Index Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h2 className="text-white text-xl font-bold leading-tight">
                 {t("appTitle")}

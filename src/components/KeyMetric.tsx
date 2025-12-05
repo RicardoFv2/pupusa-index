@@ -14,7 +14,7 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price }) => {
       <h2 className="text-white/70 text-sm font-medium uppercase tracking-wider mb-2">
         {t("keyMetricLabel")}
       </h2>
-      <div className="text-6xl md:text-7xl font-bold text-white tracking-tighter drop-shadow-lg">
+      <div className="text-5xl md:text-6xl font-bold text-white tracking-tighter drop-shadow-lg">
         ${price.toFixed(2)}
       </div>
     </GlassCard>
