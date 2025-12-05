@@ -157,6 +157,7 @@ function AppContent() {
             {showAdmin && adminPassword && (
               <AdminDashboard
                 onUpdate={fetchPupusaPrices}
+                onLogout={handleLogout}
                 password={adminPassword}
               />
             )}

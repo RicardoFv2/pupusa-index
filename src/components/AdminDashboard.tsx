@@ -5,11 +5,13 @@ import { supabase } from "../utils/supabase";
 
 type AdminDashboardProps = {
   onUpdate: () => void;
+  onLogout: () => void;
   password?: string;
 };
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onUpdate,
+  onLogout,
   password = "pupusa123",
 }) => {
   const { t } = useLanguage();
@@ -125,13 +127,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {message.text}
           </span>
         )}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="ml-auto bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? t("adminSaving") : t("adminSave")}
-        </button>
+        <div className="ml-auto flex gap-3">
+          <button
+            onClick={onLogout}
+            className="bg-red-500/20 hover:bg-red-500/40 text-red-200 font-bold py-2 px-6 rounded-lg transition-colors border border-red-500/30"
+          >
+            {t("adminLogout")}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? t("adminSaving") : t("adminSave")}
+          </button>
+        </div>
       </div>
     </GlassCard>
   );
