@@ -12,7 +12,7 @@ type AdminDashboardProps = {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onUpdate,
   onLogout,
-  password = "pupusa123",
+  password,
 }) => {
   const { t } = useLanguage();
   const [prices, setPrices] = useState<Record<string, string>>({});
