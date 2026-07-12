@@ -13,12 +13,15 @@ import CustomNotification from "./components/Notification";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import LanguageToggle from "./components/LanguageToggle";
 import SubmitPriceModal from "./components/SubmitPriceModal";
+import PriceChart from "./components/PriceChart";
+import { usePriceHistory } from "./hooks/usePriceHistory";
 import { supabase } from "./utils/supabase";
 
 // ... (inside App function)
 
 function AppContent() {
   const { t } = useLanguage();
+  const { history, latest, previous } = usePriceHistory();
   const [pupusaPrices, setPupusaPrices] = useState<Record<string, number>>({}); // Store all pupusa prices
   const [mainPupusaPrice, setMainPupusaPrice] = useState(0); // Price for 'Revueltas' or a default
   const [loading, setLoading] = useState(true);
@@ -151,7 +154,9 @@ function AppContent() {
 
         <main className="flex h-full grow flex-col items-center w-full px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex flex-col max-w-4xl w-full gap-12">
-            <Hero />
+            <div className="animate-fade-up">
+              <Hero />
+            </div>
 
             {showAdmin && adminPassword && (
               <AdminDashboard
@@ -161,8 +166,18 @@ function AppContent() {
               />
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <KeyMetric price={mainPupusaPrice} />
+            <div className="animate-fade-up" style={{ animationDelay: "80ms" }}>
+              <KeyMetric
+                price={mainPupusaPrice}
+                latest={latest}
+                previous={previous}
+              />
+            </div>
+
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up"
+              style={{ animationDelay: "160ms" }}
+            >
               <ContextualData price={mainPupusaPrice} wage={minimumWage} />
               <LaborTimeMetric
                 price={mainPupusaPrice}
@@ -170,8 +185,18 @@ function AppContent() {
               />
               <GlobalParity localPrice={mainPupusaPrice} />
             </div>
-            <Calculator price={mainPupusaPrice} />
-            <About />
+
+            <div className="animate-fade-up" style={{ animationDelay: "240ms" }}>
+              <PriceChart history={history} />
+            </div>
+
+            <div className="animate-fade-up" style={{ animationDelay: "320ms" }}>
+              <Calculator price={mainPupusaPrice} />
+            </div>
+
+            <div className="animate-fade-up" style={{ animationDelay: "400ms" }}>
+              <About />
+            </div>
           </div>
         </main>
 

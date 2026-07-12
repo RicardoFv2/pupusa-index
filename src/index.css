@@ -10,10 +10,23 @@ body {
   @apply fixed inset-0 -z-10 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e];
 }
 
+/* Subtle atmospheric glow at the top — depth without touching the base identity */
+.gradient-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    60% 45% at 50% -5%,
+    rgba(0, 209, 255, 0.12),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
 .glass-card {
   @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg rounded-xl transition-all duration-300;
 }
-  
+
 .glass-card:hover {
   @apply shadow-2xl border-white/30;
 }
@@ -24,4 +37,41 @@ body {
 
 .input-glass:focus {
   @apply ring-0 border-primary outline-none;
+}
+
+/* Editorial eyebrow / kicker label */
+.eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.22em] text-white/50;
+}
+
+/* Numeric display: serif figures with tabular alignment so count-up doesn't jitter */
+.num-serif {
+  @apply font-serif tabular-nums;
+  font-optical-sizing: auto;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Orchestrated page-load reveal */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+  .gradient-bg::after {
+    display: none;
+  }
 }

@@ -34,5 +34,10 @@ yarn-error.log*
 
 # Local data
 prices.json
-!api/prices.json
-server/submissions.json
+
+# Local secrets (never commit)
+.secrets.local
+.vercel
+
+# Supabase CLI local state
+supabase/.temp

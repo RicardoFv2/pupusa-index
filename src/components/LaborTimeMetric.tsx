@@ -27,9 +27,9 @@ const LaborTimeMetric: React.FC<LaborTimeMetricProps> = ({
       <h3 className="text-white/70 text-sm font-medium uppercase tracking-wider mb-1">
         {t("laborTimeTitle")}
       </h3>
-      <div className="text-4xl font-bold text-white mb-2">
+      <div className="num-serif text-5xl font-semibold text-white mb-2">
         {Math.round(minutesToEarn)}{" "}
-        <span className="text-lg font-normal text-white/60">
+        <span className="font-display text-lg font-normal text-white/60">
           {t("laborTimeMin")}
         </span>
       </div>

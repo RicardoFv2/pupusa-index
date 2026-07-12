@@ -13,7 +13,8 @@ export default {
         "background-dark": "#101622",
       },
       fontFamily: {
-        "display": ["Inter", "sans-serif"]
+        "display": ["Inter", "sans-serif"],
+        "serif": ["Fraunces", "Georgia", "serif"]
       },
     },
   },

@@ -21,9 +21,11 @@ const ContextualData: React.FC<ContextualDataProps> = ({ price, wage }) => {
       <h3 className="text-white/70 text-sm font-medium uppercase tracking-wider mb-1">
         {t("contextualDataLabel")}
       </h3>
-      <div className="text-5xl font-bold text-white mb-2">{pupusasPerDay}</div>
+      <div className="num-serif text-5xl font-semibold text-white mb-2">
+        {pupusasPerDay}
+      </div>
       <p className="text-white/50 text-xs max-w-[200px]">
-        Based on daily minimum wage of ${wage.toFixed(2)}
+        {t("contextualBasedOn")} ${wage.toFixed(2)}
       </p>
     </GlassCard>
   );

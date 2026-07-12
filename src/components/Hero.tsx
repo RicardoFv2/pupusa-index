@@ -5,11 +5,12 @@ const Hero: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="text-center space-y-4">
-      <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 tracking-tight">
+    <div className="text-center">
+      <p className="eyebrow mb-4">{t("mastheadLabel")}</p>
+      <h1 className="font-serif text-5xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/55 md:text-7xl">
         {t("heroTitle")}
       </h1>
-      <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto font-light leading-relaxed">
+      <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-relaxed text-white/70 md:text-xl">
         {t("heroSubtitle")}
       </p>
     </div>
