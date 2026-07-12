@@ -11,11 +11,14 @@ const HOURLY_WAGE = MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH;
 const MIN_VALID_PRICE = 0.25;
 const MAX_VALID_PRICE = 5.0;
 
+// Lightweight, static El Salvador pupusa price guide. PedidosYa was dropped as
+// a target: it's a heavy, bot-protected JS SPA that Firecrawl couldn't render
+// within Vercel's function budget (408 timeouts). This page lists revuelta
+// prices as plain text, so extraction is fast and reliable.
 const TARGET_URL =
-  "https://www.pedidosya.com.sv/restaurantes/san-salvador?q=pupusas"; // PedidosYa search for pupusas in San Salvador
+  "https://www.visitelsalvador.ai/blog/pupusas-guide-complet-garnitures-prix";
 
-// Allow the function to run long enough for the Firecrawl scrape above (Vercel
-// Hobby caps at 60s; the scrape timeout below stays under this budget).
+// Vercel Hobby caps function duration at 60s; the scrape stays well under it.
 export const config = { maxDuration: 60 };
 
 function validateScrapedPrice(value: unknown): number {
@@ -75,15 +78,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     crawlResponse = await app.scrapeUrl(TARGET_URL, {
       formats: ["json"],
-      // PedidosYa is a heavy JS SPA: scrape from El Salvador, give the page
-      // time to render, and allow a long scrape timeout (Firecrawl's default
-      // ~30s times out on this target — see the 408 it returns otherwise).
-      location: { country: "SV", languages: ["es"] },
-      waitFor: 5000,
-      timeout: 55000,
+      onlyMainContent: true,
+      timeout: 30000,
       jsonOptions: {
         prompt:
-          'Navega por los resultados de PedidosYa y extrae el precio unitario de una \'Pupusa Revuelta\' de uno de los restaurantes destacados. Devuelve obligatoriamente un objeto JSON: { "unit_price": number, "source": string }. El source debe ser el nombre del restaurante encontrado.',
+          'Esta página es una guía de precios de pupusas en El Salvador. Extrae el precio unitario típico (promedio) de una "Pupusa Revuelta" en una pupusería estándar (no zona turística ni puesto callejero). Si se da un rango, usa el extremo inferior. Devuelve obligatoriamente un objeto JSON: { "unit_price": number, "source": string }. unit_price en USD como número; source = una descripción breve de la fuente, p.ej. "pupusería estándar".',
       },
     });
   } catch (error: any) {
@@ -109,11 +108,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error("Invalid scraped payload:", JSON.stringify(payload));
     return res.status(422).json({ success: false, error: error.message });
   }
-  const restaurant =
+  const detail =
     typeof payload.source === "string" && payload.source.trim()
       ? payload.source.trim()
-      : "restaurante desconocido";
-  const source = `PedidosYa – ${restaurant}`;
+      : "pupusería estándar";
+  const source = `Visit El Salvador – ${detail}`;
 
   // 4. Calculate Pupusa Index
   // Formula: pupusa_index = (precio_pupusa / pago_por_hora)
