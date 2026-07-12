@@ -6,7 +6,7 @@ export const translations = {
     heroTitle: "The Pupusa Index",
     heroSubtitle:
       "Tracking the purchasing power of El Salvador through the price of a Pupusa Revueltas.",
-    keyMetricLabel: "Current Average Price",
+    keyMetricLabel: "Cheapest Local Price",
     contextualDataLabel: "Pupusas per Daily Minimum Wage",
     contextualBasedOn: "Based on daily minimum wage of",
     calculatorTitle: "Pupusa Calculator",
@@ -65,7 +65,7 @@ export const translations = {
     heroTitle: "El Índice Pupusa",
     heroSubtitle:
       "Rastreando el poder adquisitivo de El Salvador a través del precio de una Pupusa Revuelta.",
-    keyMetricLabel: "Precio Promedio Actual",
+    keyMetricLabel: "Precio Local Más Bajo",
     contextualDataLabel: "Pupusas por Salario Mínimo Diario",
     contextualBasedOn: "Según el salario mínimo diario de",
     calculatorTitle: "Calculadora de Pupusas",

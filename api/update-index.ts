@@ -31,7 +31,7 @@ const SOURCES: { name: string; url: string }[] = [
 ];
 
 const EXTRACT_PROMPT =
-  'Esta página contiene precios de pupusas en El Salvador (en dólares USD). Extrae el precio unitario de UNA "pupusa revuelta" y de UNA "pupusa de frijol con queso" — el precio individual, nunca un combo. Si se da un rango de precios, usa el valor más bajo (el precio más barato/local). Si algún tipo no aparece, ponlo en null. Devuelve obligatoriamente un objeto JSON: { "revuelta_price": number | null, "frijol_queso_price": number | null }.';
+  'Esta página contiene precios de pupusas en El Salvador (en dólares USD). Extrae el precio unitario MÁS BARATO disponible de UNA "pupusa revuelta" y de UNA "pupusa de frijol con queso" — el precio individual más económico (puesto de mercado, pupusería de barrio o el ítem de menor precio), nunca combos ni precios de zona turística. Si se da un rango, usa siempre el valor más bajo. Si algún tipo no aparece, ponlo en null. Devuelve obligatoriamente un objeto JSON: { "revuelta_price": number | null, "frijol_queso_price": number | null }.';
 
 // Vercel Hobby caps function duration at 60s; parallel scrapes stay well under it.
 export const config = { maxDuration: 60 };
@@ -45,7 +45,9 @@ function sanitizePrice(value: unknown): number | null {
     : null;
 }
 
-const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+// The index tracks the cheapest local price, so we take the minimum across
+// sources (delivery-app prices carry a markup and simply never win).
+const lowest = (xs: number[]) => Math.min(...xs);
 const round2 = (n: number) => Number(n.toFixed(2));
 
 type SourceResult = {
@@ -145,11 +147,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // 4. Average across sources.
-  const avgRevuelta = round2(mean(revueltas));
-  const avgFrijol = frijoles.length ? round2(mean(frijoles)) : null;
-  const pupusaIndex = Number((avgRevuelta / HOURLY_WAGE).toFixed(4));
-  const source = `Promedio · ${revueltas.length} fuentes SV`;
+  // 4. Take the cheapest local price across sources.
+  const cheapestRevuelta = round2(lowest(revueltas));
+  const cheapestFrijol = frijoles.length ? round2(lowest(frijoles)) : null;
+  const pupusaIndex = Number((cheapestRevuelta / HOURLY_WAGE).toFixed(4));
+  const source = `Precio local más bajo · ${revueltas.length} fuentes`;
 
   // 5. Persist and return.
   try {
@@ -159,8 +161,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { auth: { persistSession: false } }
     );
     await persist(supabase, {
-      revuelta: avgRevuelta,
-      frijolQueso: avgFrijol,
+      revuelta: cheapestRevuelta,
+      frijolQueso: cheapestFrijol,
       indexValue: pupusaIndex,
       source,
     });
@@ -169,8 +171,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
       persisted: true,
       data: {
-        pupusa_price: avgRevuelta,
-        frijol_con_queso_price: avgFrijol,
+        pupusa_price: cheapestRevuelta,
+        frijol_con_queso_price: cheapestFrijol,
         hourly_wage: HOURLY_WAGE.toFixed(4),
         pupusa_index: pupusaIndex.toFixed(4),
         source,
