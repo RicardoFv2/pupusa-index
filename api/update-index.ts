@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import FirecrawlApp from "@mendable/firecrawl-js";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // Configuration constants
 const MINIMUM_WAGE_MONTHLY = 408.0; // USD in El Salvador (Updated)
@@ -11,54 +11,98 @@ const HOURLY_WAGE = MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH;
 const MIN_VALID_PRICE = 0.25;
 const MAX_VALID_PRICE = 5.0;
 
-// Lightweight, static El Salvador pupusa price guide. PedidosYa was dropped as
-// a target: it's a heavy, bot-protected JS SPA that Firecrawl couldn't render
-// within Vercel's function budget (408 timeouts). This page lists revuelta
-// prices as plain text, so extraction is fast and reliable.
-const TARGET_URL =
-  "https://www.visitelsalvador.ai/blog/pupusas-guide-complet-garnitures-prix";
+// Multiple El Salvador sources: a national price guide plus real delivery-menu
+// stores. They are scraped in parallel and averaged, and per source we take the
+// cheapest quoted price, so the index also reflects affordable local vendors.
+// (PedidosYa was dropped — a heavy, bot-protected SPA that timed out at 408.)
+const SOURCES: { name: string; url: string }[] = [
+  {
+    name: "Visit El Salvador",
+    url: "https://www.visitelsalvador.ai/blog/pupusas-guide-complet-garnitures-prix",
+  },
+  {
+    name: "Uber Eats · La Estación de la Pupusa",
+    url: "https://www.ubereats.com/sv/store/la-estacion-de-la-pupusa-san-salvador/2uttLM_UUJCDCxfel3mm8w",
+  },
+  {
+    name: "Uber Eats · La Pupusería SV",
+    url: "https://www.ubereats.com/sv/store/la-pupuseria-sv/A3SxK2yxQXqEKF2P2pLnPg",
+  },
+];
 
-// Vercel Hobby caps function duration at 60s; the scrape stays well under it.
+const EXTRACT_PROMPT =
+  'Esta página contiene precios de pupusas en El Salvador (en dólares USD). Extrae el precio unitario de UNA "pupusa revuelta" y de UNA "pupusa de frijol con queso" — el precio individual, nunca un combo. Si se da un rango de precios, usa el valor más bajo (el precio más barato/local). Si algún tipo no aparece, ponlo en null. Devuelve obligatoriamente un objeto JSON: { "revuelta_price": number | null, "frijol_queso_price": number | null }.';
+
+// Vercel Hobby caps function duration at 60s; parallel scrapes stay well under it.
 export const config = { maxDuration: 60 };
 
-function validateScrapedPrice(value: unknown): number {
-  if (
-    typeof value !== "number" ||
-    !Number.isFinite(value) ||
-    value < MIN_VALID_PRICE ||
-    value > MAX_VALID_PRICE
-  ) {
-    throw new Error(
-      `Scraped price out of valid range [$${MIN_VALID_PRICE}, $${MAX_VALID_PRICE}]: ${JSON.stringify(value)}`
-    );
-  }
-  return value;
+function sanitizePrice(value: unknown): number | null {
+  return typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= MIN_VALID_PRICE &&
+    value <= MAX_VALID_PRICE
+    ? value
+    : null;
 }
 
-async function persistScrape(row: {
-  price: number;
-  source: string;
-  indexValue: number;
-  hourlyWage: number;
-}): Promise<void> {
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  );
+const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+const round2 = (n: number) => Number(n.toFixed(2));
+
+type SourceResult = {
+  name: string;
+  revuelta: number | null;
+  frijolQueso: number | null;
+};
+
+async function scrapeSource(
+  app: FirecrawlApp,
+  s: { name: string; url: string }
+): Promise<SourceResult> {
+  const r = await app.scrapeUrl(s.url, {
+    formats: ["json"],
+    onlyMainContent: true,
+    timeout: 30000,
+    jsonOptions: { prompt: EXTRACT_PROMPT },
+  });
+  if (!r.success) throw new Error(`${s.name}: ${r.error}`);
+  const j = (r.json ?? {}) as {
+    revuelta_price?: unknown;
+    frijol_queso_price?: unknown;
+  };
+  return {
+    name: s.name,
+    revuelta: sanitizePrice(j.revuelta_price),
+    frijolQueso: sanitizePrice(j.frijol_queso_price),
+  };
+}
+
+async function persist(
+  supabase: SupabaseClient,
+  row: {
+    revuelta: number;
+    frijolQueso: number | null;
+    indexValue: number;
+    source: string;
+  }
+): Promise<void> {
+  const prices = [{ type: "pupusa revuelta", price: row.revuelta }];
+  if (row.frijolQueso != null) {
+    prices.push({ type: "pupusa frijol con queso", price: row.frijolQueso });
+  }
 
   const { error: upsertError } = await supabase
     .from("pupusa_prices")
-    .upsert({ type: "pupusa revuelta", price: row.price }, { onConflict: "type" });
+    .upsert(prices, { onConflict: "type" });
   if (upsertError) {
     throw new Error(`Failed to upsert pupusa_prices: ${upsertError.message}`);
   }
 
   const { error: insertError } = await supabase.from("price_history").insert({
-    price: row.price,
+    price: row.revuelta,
+    price_frijol_queso: row.frijolQueso,
     source: row.source,
     index_value: row.indexValue,
-    hourly_wage: row.hourlyWage,
+    hourly_wage: round2(HOURLY_WAGE),
   });
   if (insertError) {
     throw new Error(`Failed to insert price_history: ${insertError.message}`);
@@ -66,75 +110,71 @@ async function persistScrape(row: {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // 1. Security Check: Verify CRON_SECRET (Vercel cron sends it automatically)
+  // 1. Security check: verify CRON_SECRET (Vercel cron sends it automatically)
   const authHeader = req.headers["authorization"];
   if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // 2. AI-Powered Scraping
+  // 2. Scrape every source in parallel; a single failure must not sink the run.
   const app = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
-  let crawlResponse;
-  try {
-    crawlResponse = await app.scrapeUrl(TARGET_URL, {
-      formats: ["json"],
-      onlyMainContent: true,
-      timeout: 30000,
-      jsonOptions: {
-        prompt:
-          'Esta página es una guía de precios de pupusas en El Salvador. Extrae el precio unitario típico (promedio) de una "Pupusa Revuelta" en una pupusería estándar (no zona turística ni puesto callejero). Si se da un rango, usa el extremo inferior. Devuelve obligatoriamente un objeto JSON: { "unit_price": number, "source": string }. unit_price en USD como número; source = una descripción breve de la fuente, p.ej. "pupusería estándar".',
-      },
+  const settled = await Promise.allSettled(
+    SOURCES.map((s) => scrapeSource(app, s))
+  );
+
+  const results: SourceResult[] = [];
+  settled.forEach((r, i) => {
+    if (r.status === "fulfilled") results.push(r.value);
+    else console.warn(`Source failed (${SOURCES[i].name}):`, r.reason?.message ?? r.reason);
+  });
+
+  const revueltas = results
+    .map((r) => r.revuelta)
+    .filter((x): x is number => x != null);
+  const frijoles = results
+    .map((r) => r.frijolQueso)
+    .filter((x): x is number => x != null);
+
+  // 3. Need at least one valid revuelta price to form the index.
+  if (revueltas.length === 0) {
+    console.error("No source yielded a valid revuelta price:", JSON.stringify(results));
+    return res.status(502).json({
+      success: false,
+      error: "No source yielded a valid revuelta price",
+      sources: results,
     });
-  } catch (error: any) {
-    console.error("Firecrawl request error:", error);
-    return res
-      .status(502)
-      .json({ success: false, error: `Firecrawl request failed: ${error.message}` });
   }
 
-  if (!crawlResponse.success) {
-    console.error("Firecrawl scrape failed:", crawlResponse.error);
-    return res
-      .status(502)
-      .json({ success: false, error: `Firecrawl failed: ${crawlResponse.error}` });
-  }
+  // 4. Average across sources.
+  const avgRevuelta = round2(mean(revueltas));
+  const avgFrijol = frijoles.length ? round2(mean(frijoles)) : null;
+  const pupusaIndex = Number((avgRevuelta / HOURLY_WAGE).toFixed(4));
+  const source = `Promedio · ${revueltas.length} fuentes SV`;
 
-  // 3. Validate extracted payload — never persist garbage
-  const payload = crawlResponse.json as { unit_price?: unknown; source?: unknown };
-  let unitPrice: number;
+  // 5. Persist and return.
   try {
-    unitPrice = validateScrapedPrice(payload?.unit_price);
-  } catch (error: any) {
-    console.error("Invalid scraped payload:", JSON.stringify(payload));
-    return res.status(422).json({ success: false, error: error.message });
-  }
-  const detail =
-    typeof payload.source === "string" && payload.source.trim()
-      ? payload.source.trim()
-      : "pupusería estándar";
-  const source = `Visit El Salvador – ${detail}`;
-
-  // 4. Calculate Pupusa Index
-  // Formula: pupusa_index = (precio_pupusa / pago_por_hora)
-  const pupusaIndex = unitPrice / HOURLY_WAGE;
-
-  // 5. Persist and return
-  try {
-    await persistScrape({
-      price: unitPrice,
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    );
+    await persist(supabase, {
+      revuelta: avgRevuelta,
+      frijolQueso: avgFrijol,
+      indexValue: pupusaIndex,
       source,
-      indexValue: Number(pupusaIndex.toFixed(4)),
-      hourlyWage: Number(HOURLY_WAGE.toFixed(2)),
     });
 
     return res.status(200).json({
       success: true,
       persisted: true,
       data: {
-        pupusa_price: unitPrice,
+        pupusa_price: avgRevuelta,
+        frijol_con_queso_price: avgFrijol,
         hourly_wage: HOURLY_WAGE.toFixed(4),
         pupusa_index: pupusaIndex.toFixed(4),
         source,
+        contributing: results,
         timestamp: new Date().toISOString(),
       },
     });
