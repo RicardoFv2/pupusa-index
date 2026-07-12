@@ -4,6 +4,7 @@ import { supabase } from "../utils/supabase";
 export type PriceHistoryEntry = {
   id: number;
   price: number;
+  price_frijol_queso: number | null;
   source: string;
   index_value: number;
   hourly_wage: number;
@@ -38,6 +39,8 @@ export function usePriceHistory(): PriceHistoryState {
             data.map((d: any) => ({
               id: Number(d.id),
               price: Number(d.price),
+              price_frijol_queso:
+                d.price_frijol_queso == null ? null : Number(d.price_frijol_queso),
               source: String(d.source ?? ""),
               index_value: Number(d.index_value),
               hourly_wage: Number(d.hourly_wage),

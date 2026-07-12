@@ -23,6 +23,8 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
   const up = delta !== null && delta > 0.05;
   const down = delta !== null && delta < -0.05;
 
+  const frijolPrice = latest?.price_frijol_queso ?? null;
+
   return (
     <GlassCard noHover className="p-8 md:p-10">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -47,6 +49,21 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
                   {up ? "arrow_upward" : down ? "arrow_downward" : "remove"}
                 </span>
                 {Math.abs(delta).toFixed(1)}%
+              </span>
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+            <span className="inline-flex items-center gap-1.5 text-white/50">
+              <span className="size-2 rounded-full bg-[#00d1ff]" />
+              {t("revueltaLabel")}
+            </span>
+            {frijolPrice != null && (
+              <span className="inline-flex items-center gap-1.5 text-white/60">
+                <span className="size-2 rounded-full bg-amber-300" />
+                {t("frijolLabel")}
+                <span className="num-serif font-semibold text-white/90">
+                  ${frijolPrice.toFixed(2)}
+                </span>
               </span>
             )}
           </div>

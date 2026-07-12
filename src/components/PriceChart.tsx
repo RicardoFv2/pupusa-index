@@ -24,9 +24,11 @@ type ChartDatum = {
   label: string;
   price: number;
   index: number;
+  frijol: number | null;
 };
 
 const ACCENT = "#00d1ff";
+const ACCENT_FRIJOL = "#fbbf24";
 
 const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
   const { t, language } = useLanguage();
@@ -40,12 +42,19 @@ const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
       label: formatShortDate(h.scraped_at, language),
       price: h.price,
       index: (h.price / base) * 100,
+      frijol: h.price_frijol_queso,
     }));
   }, [history, language]);
 
+  const showFrijol = mode === "price" && data.some((d) => d.frijol != null);
+
   const domain = useMemo<[number, number]>(() => {
     if (!data.length) return [0, 1];
-    const values = data.map((d) => (mode === "price" ? d.price : d.index));
+    const values: number[] = [];
+    data.forEach((d) => {
+      values.push(mode === "price" ? d.price : d.index);
+      if (mode === "price" && d.frijol != null) values.push(d.frijol);
+    });
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = mode === "price" ? 0.15 : 6;
@@ -65,9 +74,23 @@ const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
         <p className="text-[11px] text-white/50">
           {formatDate(datum.iso, language)}
         </p>
-        <p className="num-serif text-lg font-semibold text-white">
-          {formatValue(value)}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <span className="size-2 rounded-full" style={{ background: ACCENT }} />
+          <p className="num-serif text-lg font-semibold text-white">
+            {formatValue(value)}
+          </p>
+        </div>
+        {showFrijol && datum.frijol != null && (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <span
+              className="size-2 rounded-full"
+              style={{ background: ACCENT_FRIJOL }}
+            />
+            <p className="num-serif text-sm font-medium text-white/80">
+              ${datum.frijol.toFixed(2)}
+            </p>
+          </div>
+        )}
       </div>
     );
   };
@@ -99,6 +122,22 @@ const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
         </div>
       </div>
 
+      {showFrijol && (
+        <div className="mb-3 flex flex-wrap items-center gap-4 text-xs text-white/55">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full" style={{ background: ACCENT }} />
+            {t("chartRevuelta")}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="size-2 rounded-full"
+              style={{ background: ACCENT_FRIJOL }}
+            />
+            {t("chartFrijol")}
+          </span>
+        </div>
+      )}
+
       {data.length === 0 ? (
         <div className="flex h-64 items-center justify-center px-6 text-center">
           <p className="max-w-sm text-sm text-white/40">{t("chartEmpty")}</p>
@@ -114,6 +153,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
                 <linearGradient id="pupusaFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={ACCENT} stopOpacity={0.35} />
                   <stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="frijolFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={ACCENT_FRIJOL} stopOpacity={0.18} />
+                  <stop offset="100%" stopColor={ACCENT_FRIJOL} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -157,6 +200,23 @@ const PriceChart: React.FC<PriceChartProps> = ({ history }) => {
                   strokeWidth: 2,
                 }}
               />
+              {showFrijol && (
+                <Area
+                  type="monotone"
+                  dataKey="frijol"
+                  stroke={ACCENT_FRIJOL}
+                  strokeWidth={2}
+                  fill="url(#frijolFill)"
+                  dot={false}
+                  connectNulls
+                  activeDot={{
+                    r: 4,
+                    fill: ACCENT_FRIJOL,
+                    stroke: "#0f0c29",
+                    strokeWidth: 2,
+                  }}
+                />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         </div>
