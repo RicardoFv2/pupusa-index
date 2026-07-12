@@ -14,6 +14,10 @@ const MAX_VALID_PRICE = 5.0;
 const TARGET_URL =
   "https://www.pedidosya.com.sv/restaurantes/san-salvador?q=pupusas"; // PedidosYa search for pupusas in San Salvador
 
+// Allow the function to run long enough for the Firecrawl scrape above (Vercel
+// Hobby caps at 60s; the scrape timeout below stays under this budget).
+export const config = { maxDuration: 60 };
+
 function validateScrapedPrice(value: unknown): number {
   if (
     typeof value !== "number" ||
@@ -71,6 +75,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     crawlResponse = await app.scrapeUrl(TARGET_URL, {
       formats: ["json"],
+      // PedidosYa is a heavy JS SPA: scrape from El Salvador, give the page
+      // time to render, and allow a long scrape timeout (Firecrawl's default
+      // ~30s times out on this target — see the 408 it returns otherwise).
+      location: { country: "SV", languages: ["es"] },
+      waitFor: 5000,
+      timeout: 55000,
       jsonOptions: {
         prompt:
           'Navega por los resultados de PedidosYa y extrae el precio unitario de una \'Pupusa Revuelta\' de uno de los restaurantes destacados. Devuelve obligatoriamente un objeto JSON: { "unit_price": number, "source": string }. El source debe ser el nombre del restaurante encontrado.',
