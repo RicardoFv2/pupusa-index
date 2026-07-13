@@ -17,16 +17,26 @@ const MAX_VALID_PRICE = 5.0;
 // Firecrawl credits: a national price guide (usually the cheapest, street/market
 // tier) plus one real delivery-menu store as a fallback/reference.
 // (PedidosYa was dropped — a heavy, bot-protected SPA that timed out at 408.)
-const SOURCES: { name: string; url: string }[] = [
+const SOURCES: { name: string; url: string; primary?: boolean }[] = [
   {
     name: "Visit El Salvador",
     url: "https://www.visitelsalvador.ai/blog/pupusas-guide-complet-garnitures-prix",
+    // The street/market price anchor: it's what makes the "cheapest local"
+    // number credible. Delivery menus alone are always marked up.
+    primary: true,
   },
   {
     name: "Uber Eats · La Pupusería SV",
     url: "https://www.ubereats.com/sv/store/la-pupuseria-sv/A3SxK2yxQXqEKF2P2pLnPg",
   },
 ];
+
+// If none of the primary sources contribute a valid price, the surviving data is
+// delivery-inflated only — we fall back to the last known-good measurement rather
+// than persisting a price that would spike the index for a whole month.
+const PRIMARY_SOURCE_NAMES = new Set(
+  SOURCES.filter((s) => s.primary).map((s) => s.name)
+);
 
 const EXTRACT_PROMPT =
   'Esta página contiene precios de pupusas en El Salvador (en dólares USD). Extrae el precio unitario MÁS BARATO disponible de UNA "pupusa revuelta" y de UNA "pupusa de frijol con queso" — el precio individual más económico (puesto de mercado, pupusería de barrio o el ítem de menor precio), nunca combos ni precios de zona turística. Si se da un rango, usa siempre el valor más bajo. Si algún tipo no aparece, ponlo en null. Devuelve obligatoriamente un objeto JSON: { "revuelta_price": number | null, "frijol_queso_price": number | null }.';
@@ -145,19 +155,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // 4. Take the cheapest local price across sources.
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  );
+
+  // 4. Fallback guard: only trust the "cheapest local" number when a primary
+  //    street/market source contributed. If only delivery-app prices survived,
+  //    persisting them would spike the index for a whole month — so instead we
+  //    keep the last known-good measurement and skip persistence.
+  const primaryOk = results.some(
+    (r) => PRIMARY_SOURCE_NAMES.has(r.name) && r.revuelta != null
+  );
+
+  if (!primaryOk) {
+    console.warn(
+      "Primary source unavailable — only delivery-inflated prices survived; " +
+        "keeping last known-good value instead of persisting.",
+      JSON.stringify(results)
+    );
+
+    const { data: lastRow } = await supabase
+      .from("price_history")
+      .select("price, price_frijol_queso, scraped_at")
+      .order("scraped_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    return res.status(200).json({
+      success: true,
+      persisted: false,
+      fallback: true,
+      reason:
+        "Primary source unavailable; kept the last known-good price instead of the delivery-inflated scrape.",
+      data: {
+        pupusa_price: lastRow?.price ?? null,
+        frijol_con_queso_price: lastRow?.price_frijol_queso ?? null,
+        kept_since: lastRow?.scraped_at ?? null,
+        rejected: results,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+
+  // 5. Primary present → take the cheapest local price across sources.
   const cheapestRevuelta = round2(lowest(revueltas));
   const cheapestFrijol = frijoles.length ? round2(lowest(frijoles)) : null;
   const pupusaIndex = Number((cheapestRevuelta / HOURLY_WAGE).toFixed(4));
   const source = `Precio local más bajo · ${revueltas.length} fuentes`;
 
-  // 5. Persist and return.
+  // 6. Persist and return.
   try {
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false } }
-    );
     await persist(supabase, {
       revuelta: cheapestRevuelta,
       frijolQueso: cheapestFrijol,
@@ -168,6 +217,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       persisted: true,
+      fallback: false,
       data: {
         pupusa_price: cheapestRevuelta,
         frijol_con_queso_price: cheapestFrijol,
