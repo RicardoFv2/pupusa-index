@@ -13,6 +13,10 @@
     {
       "path": "/api/update-index",
       "schedule": "0 8 1 * *"
+    },
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 6 */3 * *"
     }
   ]
 }

@@ -67,10 +67,16 @@ FIRECRAWL_API_KEY=your_firecrawl_key
 CRON_SECRET=any_random_secret
 ```
 
-Vercel automatically sends `Authorization: Bearer $CRON_SECRET` when invoking cron jobs. The cron runs on the 1st of each month at 08:00 UTC (see `vercel.json`). To trigger it manually:
+Vercel automatically sends `Authorization: Bearer $CRON_SECRET` when invoking cron jobs. Two crons are configured in `vercel.json`:
+
+- **`/api/update-index`** — 1st of each month at 08:00 UTC. Scrapes the price and records history.
+- **`/api/keep-alive`** — every 3 days at 06:00 UTC. Issues a trivial read so the Supabase free-tier project never hits the 7-day inactivity pause.
+
+To trigger either manually:
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://your-deployment.vercel.app/api/update-index
+curl -H "Authorization: Bearer $CRON_SECRET" https://your-deployment.vercel.app/api/keep-alive
 ```
 
 ## 💻 Getting Started
