@@ -50,22 +50,25 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
               </span>
             )}
           </div>
-          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-            <span className="inline-flex items-center gap-2">
-              <span className="size-2.5 rounded-full bg-[#00d1ff]" />
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <span className="inline-flex items-baseline gap-2">
               <span className="text-white/55">{t("revueltaLabel")}</span>
               <span className="num-serif font-semibold text-white/90">
                 ${price.toFixed(2)}
               </span>
             </span>
             {frijolPrice != null && (
-              <span className="inline-flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-amber-300" />
-                <span className="text-white/55">{t("frijolLabel")}</span>
-                <span className="num-serif font-semibold text-white/90">
-                  ${frijolPrice.toFixed(2)}
+              <>
+                <span aria-hidden className="text-white/20">
+                  &middot;
                 </span>
-              </span>
+                <span className="inline-flex items-baseline gap-2">
+                  <span className="text-white/55">{t("frijolLabel")}</span>
+                  <span className="num-serif font-semibold text-white/90">
+                    ${frijolPrice.toFixed(2)}
+                  </span>
+                </span>
+              </>
             )}
           </div>
         </div>
