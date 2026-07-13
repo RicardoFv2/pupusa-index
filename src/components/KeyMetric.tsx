@@ -34,33 +34,34 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
             <span className="num-serif text-6xl font-semibold leading-none tracking-tight text-white drop-shadow-lg md:text-8xl">
               ${display.toFixed(2)}
             </span>
-            {delta !== null && (
+            {(up || down) && (
               <span
                 className={`mb-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold ${
                   up
                     ? "bg-amber-400/15 text-amber-300"
-                    : down
-                    ? "bg-emerald-400/15 text-emerald-300"
-                    : "bg-white/10 text-white/60"
+                    : "bg-emerald-400/15 text-emerald-300"
                 }`}
                 title={t("deltaVsPrevious")}
               >
                 <span className="material-symbols-outlined text-base leading-none">
-                  {up ? "arrow_upward" : down ? "arrow_downward" : "remove"}
+                  {up ? "arrow_upward" : "arrow_downward"}
                 </span>
-                {Math.abs(delta).toFixed(1)}%
+                {Math.abs(delta!).toFixed(1)}%
               </span>
             )}
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            <span className="inline-flex items-center gap-1.5 text-white/50">
-              <span className="size-2 rounded-full bg-[#00d1ff]" />
-              {t("revueltaLabel")}
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <span className="size-2.5 rounded-full bg-[#00d1ff]" />
+              <span className="text-white/55">{t("revueltaLabel")}</span>
+              <span className="num-serif font-semibold text-white/90">
+                ${price.toFixed(2)}
+              </span>
             </span>
             {frijolPrice != null && (
-              <span className="inline-flex items-center gap-1.5 text-white/60">
-                <span className="size-2 rounded-full bg-amber-300" />
-                {t("frijolLabel")}
+              <span className="inline-flex items-center gap-2">
+                <span className="size-2.5 rounded-full bg-amber-300" />
+                <span className="text-white/55">{t("frijolLabel")}</span>
                 <span className="num-serif font-semibold text-white/90">
                   ${frijolPrice.toFixed(2)}
                 </span>
