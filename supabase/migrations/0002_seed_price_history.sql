@@ -1,5 +1,5 @@
 -- Optional seed data for local/preview development so the trend chart
--- renders before the weekly cron has accumulated real scrapes.
+-- renders before the monthly cron has accumulated real scrapes.
 -- hourly_wage = 408 / 160 = 2.55 USD/h.
 
 -- Cheapest-local baseline (the index tracks the lowest local price).

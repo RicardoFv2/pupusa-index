@@ -13,11 +13,11 @@ The Pupusa Index gauges purchasing power parity in El Salvador using the price o
 - **Charts**: [Recharts](https://recharts.org/)
 - **Icons**: Google Material Symbols & [RealFaviconGenerator](https://realfavicongenerator.net/)
 - **Database**: [Supabase](https://supabase.com/)
-- **Scraping**: [Firecrawl](https://firecrawl.dev/) via a weekly [Vercel Cron](https://vercel.com/docs/cron-jobs)
+- **Scraping**: [Firecrawl](https://firecrawl.dev/) via a monthly [Vercel Cron](https://vercel.com/docs/cron-jobs)
 
 ## 🚀 Features
 
-- **Automated Price Tracking**: A weekly cron job scrapes the price of a Pupusa Revuelta from PedidosYa (San Salvador) with Firecrawl's AI extraction and stores it in Supabase.
+- **Automated Price Tracking**: A monthly cron job scrapes the cheapest local price of a Pupusa Revuelta (and Frijol con Queso) from two El Salvador sources with Firecrawl's AI extraction, takes the minimum, and stores it in Supabase.
 - **Price History & Trend Chart**: Every scrape is recorded in `price_history`, powering the index trend chart.
 - **Community Submissions**: Visitors can submit prices they've seen, stored in Supabase.
 - **Interactive Calculator**: Calculate how many pupusas you can buy with your budget.
@@ -67,7 +67,7 @@ FIRECRAWL_API_KEY=your_firecrawl_key
 CRON_SECRET=any_random_secret
 ```
 
-Vercel automatically sends `Authorization: Bearer $CRON_SECRET` when invoking cron jobs. The cron runs Mondays at 08:00 UTC (see `vercel.json`). To trigger it manually:
+Vercel automatically sends `Authorization: Bearer $CRON_SECRET` when invoking cron jobs. The cron runs on the 1st of each month at 08:00 UTC (see `vercel.json`). To trigger it manually:
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://your-deployment.vercel.app/api/update-index

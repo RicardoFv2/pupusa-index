@@ -11,18 +11,16 @@ const HOURLY_WAGE = MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH;
 const MIN_VALID_PRICE = 0.25;
 const MAX_VALID_PRICE = 5.0;
 
-// Multiple El Salvador sources: a national price guide plus real delivery-menu
-// stores. They are scraped in parallel and averaged, and per source we take the
-// cheapest quoted price, so the index also reflects affordable local vendors.
+// El Salvador price sources scraped in parallel; per source we take the cheapest
+// quoted price and the index tracks the minimum across them, so it reflects
+// affordable local vendors. Kept to TWO sources on a monthly cadence to conserve
+// Firecrawl credits: a national price guide (usually the cheapest, street/market
+// tier) plus one real delivery-menu store as a fallback/reference.
 // (PedidosYa was dropped — a heavy, bot-protected SPA that timed out at 408.)
 const SOURCES: { name: string; url: string }[] = [
   {
     name: "Visit El Salvador",
     url: "https://www.visitelsalvador.ai/blog/pupusas-guide-complet-garnitures-prix",
-  },
-  {
-    name: "Uber Eats · La Estación de la Pupusa",
-    url: "https://www.ubereats.com/sv/store/la-estacion-de-la-pupusa-san-salvador/2uttLM_UUJCDCxfel3mm8w",
   },
   {
     name: "Uber Eats · La Pupusería SV",
