@@ -13,17 +13,27 @@ type KeyMetricProps = {
 
 const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
   const { t, language } = useLanguage();
-  const display = useCountUp(price);
+
+  const revueltaPrice = latest?.price ?? price;
+  const frijolPrice = latest?.price_frijol_queso ?? null;
+
+  // The headline is meant to be the cheapest local price, so it must compare
+  // both tracked types rather than always defaulting to the revuelta.
+  const useFrijol = frijolPrice != null && frijolPrice < revueltaPrice;
+  const headlinePrice = useFrijol ? frijolPrice : revueltaPrice;
+  const display = useCountUp(headlinePrice);
+
+  const previousHeadline = useFrijol
+    ? previous?.price_frijol_queso ?? null
+    : previous?.price ?? null;
 
   const delta =
-    latest && previous && previous.price
-      ? ((latest.price - previous.price) / previous.price) * 100
+    previousHeadline != null && previousHeadline
+      ? ((headlinePrice - previousHeadline) / previousHeadline) * 100
       : null;
 
   const up = delta !== null && delta > 0.05;
   const down = delta !== null && delta < -0.05;
-
-  const frijolPrice = latest?.price_frijol_queso ?? null;
 
   return (
     <GlassCard noHover className="p-8 md:p-10">
@@ -53,8 +63,10 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <span className="inline-flex items-baseline gap-2">
               <span className="text-white/55">{t("revueltaLabel")}</span>
-              <span className="num-serif font-semibold text-white/90">
-                ${price.toFixed(2)}
+              <span
+                className={`num-serif font-semibold ${useFrijol ? "text-white/90" : "text-[#00d1ff]"}`}
+              >
+                ${revueltaPrice.toFixed(2)}
               </span>
             </span>
             {frijolPrice != null && (
@@ -64,7 +76,9 @@ const KeyMetric: React.FC<KeyMetricProps> = ({ price, latest, previous }) => {
                 </span>
                 <span className="inline-flex items-baseline gap-2">
                   <span className="text-white/55">{t("frijolLabel")}</span>
-                  <span className="num-serif font-semibold text-white/90">
+                  <span
+                    className={`num-serif font-semibold ${useFrijol ? "text-[#00d1ff]" : "text-white/90"}`}
+                  >
                     ${frijolPrice.toFixed(2)}
                   </span>
                 </span>
