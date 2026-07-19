@@ -4,7 +4,7 @@
 
 **[👉 Try it live: pupusa-index.vercel.app](https://pupusa-index.vercel.app)**
 
-![Pupusa Index Screenshot](public/pupusa-logo.png)
+![Pupusa Index Screenshot](public/screenshot.png)
 
 ## Why it exists
 
