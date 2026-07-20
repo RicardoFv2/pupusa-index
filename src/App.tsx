@@ -61,13 +61,9 @@ function AppContent() {
 
       setPupusaPrices(prices);
 
-      // Set the main pupusa price (e.g., 'revueltas' or the first one available)
-      if (prices["pupusa revuelta"]) {
-        setMainPupusaPrice(prices["pupusa revuelta"]);
-      } else if (prices["revueltas"]) {
-        setMainPupusaPrice(prices["revueltas"]);
-      } else if (Object.keys(prices).length > 0) {
-        setMainPupusaPrice(Object.values(prices)[0]); // Fallback to the first available price
+      // The index tracks the cheapest recorded pupusa, not one fixed type.
+      if (Object.keys(prices).length > 0) {
+        setMainPupusaPrice(Math.min(...Object.values(prices)));
       } else {
         throw new Error("No pupusa prices found in response");
       }
@@ -77,9 +73,7 @@ function AppContent() {
       const errorMessage = e instanceof Error ? e.message : "Unknown error";
       console.warn("Using fallback pupusa prices:", errorMessage);
       setPupusaPrices(fallbackPrices);
-      setMainPupusaPrice(
-        fallbackPrices["revueltas"] || Object.values(fallbackPrices)[0]
-      );
+      setMainPupusaPrice(Math.min(...Object.values(fallbackPrices)));
       setLoading(false);
     }
   };
