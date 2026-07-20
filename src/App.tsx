@@ -34,9 +34,9 @@ function AppContent() {
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  // Fallback mirrors api/update-index.ts: MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH * 8h
-  const FALLBACK_HOURLY_WAGE = 408.0 / 160;
-  const minimumWage = (latest?.hourly_wage ?? FALLBACK_HOURLY_WAGE) * 8;
+  // Fallback mirrors api/update-index.ts: daily = monthly/30 (MTPS convention)
+  const FALLBACK_DAILY_WAGE = 408.0 / 30;
+  const minimumWage = latest?.hourly_wage ? latest.hourly_wage * 8 : FALLBACK_DAILY_WAGE;
 
   // Fallback data from pupusa_prices.txt
   const fallbackPrices: Record<string, number> = {

@@ -4,8 +4,12 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // Configuration constants
 const MINIMUM_WAGE_MONTHLY = 408.0; // USD in El Salvador (Updated)
-const WORKING_HOURS_PER_MONTH = 160;
-const HOURLY_WAGE = MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH;
+// MTPS convention: monthly salary is paid regardless of days in the month, so
+// the daily rate is always monthly/30, and the hourly rate is daily/8 (ordinary shift).
+const DAYS_PER_MONTH = 30;
+const HOURS_PER_DAY = 8;
+const DAILY_WAGE = MINIMUM_WAGE_MONTHLY / DAYS_PER_MONTH;
+const HOURLY_WAGE = DAILY_WAGE / HOURS_PER_DAY;
 
 // Sanity bounds for a single pupusa price in USD
 const MIN_VALID_PRICE = 0.25;
