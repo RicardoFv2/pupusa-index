@@ -34,7 +34,9 @@ function AppContent() {
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const minimumWage = 12.0;
+  // Fallback mirrors api/update-index.ts: MINIMUM_WAGE_MONTHLY / WORKING_HOURS_PER_MONTH * 8h
+  const FALLBACK_HOURLY_WAGE = 408.0 / 160;
+  const minimumWage = (latest?.hourly_wage ?? FALLBACK_HOURLY_WAGE) * 8;
 
   // Fallback data from pupusa_prices.txt
   const fallbackPrices: Record<string, number> = {
