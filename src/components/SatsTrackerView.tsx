@@ -86,7 +86,7 @@ export const SatsTrackerView: React.FC<SatsTrackerViewProps> = ({
       <PupusaBasketSimulator btcPriceUsd={btcPrice} />
 
       {/* Department Breakdown Component */}
-      <DepartmentBreakdown btcPriceUsd={btcPrice} />
+      <DepartmentBreakdown btcPriceUsd={btcPrice} mainPupusaPrice={mainPupusaPrice} />
     </div>
   );
 };
