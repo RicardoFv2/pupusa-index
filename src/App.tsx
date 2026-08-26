@@ -14,14 +14,14 @@ import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import LanguageToggle from "./components/LanguageToggle";
 import SubmitPriceModal from "./components/SubmitPriceModal";
 import PriceChart from "./components/PriceChart";
+import SatsTrackerView from "./components/SatsTrackerView";
 import { usePriceHistory } from "./hooks/usePriceHistory";
 import { supabase } from "./utils/supabase";
-
-// ... (inside App function)
 
 function AppContent() {
   const { t } = useLanguage();
   const { history, latest, previous } = usePriceHistory();
+  const [activeTab, setActiveTab] = useState<"classic" | "sats">("classic");
   const [pupusaPrices, setPupusaPrices] = useState<Record<string, number>>({}); // Store all pupusa prices
   const [mainPupusaPrice, setMainPupusaPrice] = useState(0); // Price for 'Revueltas' or a default
   const [loading, setLoading] = useState(true);
@@ -123,7 +123,7 @@ function AppContent() {
       <div className="gradient-bg" />
       <div className="relative flex min-h-screen w-full flex-col items-center overflow-x-hidden">
         <header className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center justify-between whitespace-nowrap">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 whitespace-nowrap">
             <div className="flex items-center gap-3 text-white">
               <div className="size-[60px] rounded-full overflow-hidden border border-white/20 shadow-sm">
                 <img
@@ -136,6 +136,31 @@ function AppContent() {
                 {t("appTitle")}
               </h2>
             </div>
+
+            {/* Header View Switcher Tabs */}
+            <div className="flex items-center bg-white/10 p-1 rounded-xl border border-white/15">
+              <button
+                onClick={() => setActiveTab("classic")}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === "classic"
+                    ? "bg-[#00d1ff] text-slate-950 shadow-md"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                💵 Índice Clásico (USD)
+              </button>
+              <button
+                onClick={() => setActiveTab("sats")}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === "sats"
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md font-bold"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                ⚡ Sats & AI Tracker (BTC)
+              </button>
+            </div>
+
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setShowSubmitPrice(true)}
@@ -161,6 +186,11 @@ function AppContent() {
                 password={adminPassword}
               />
             )}
+
+            {activeTab === "sats" ? (
+              <SatsTrackerView mainPupusaPrice={mainPupusaPrice} />
+            ) : (
+              <>
 
             <div className="animate-fade-up" style={{ animationDelay: "80ms" }}>
               <KeyMetric
@@ -193,6 +223,8 @@ function AppContent() {
             <div className="animate-fade-up" style={{ animationDelay: "400ms" }}>
               <About />
             </div>
+            </>
+            )}
           </div>
         </main>
 
